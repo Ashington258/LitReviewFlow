@@ -1,0 +1,43 @@
+{
+  "10.1117/1.2399537": {
+    "page": "043002-043002-13"
+  },
+  "10.1364/oe.19.019384": {
+    "container-title": ["Optics express"],
+    "page": "19384-19398"
+  },
+  "10.29026/oea.2024.230235": {
+    "issued": {
+      "date-parts": [[2025]]
+    },
+    "published-print": {
+      "date-parts": [[2025]]
+    },
+    "page": "230235-1-230235-11"
+  },
+  "10.1364/oe.17.023690": {
+    "page": "23690-23701"
+  },
+  "10.1117/12.658876": {
+    "page": "534-542"
+  },
+  "10.1117/12.681857": {
+    "title": ["Inverse lithography technology (ILT): What is the impact to the photomask industry?"],
+    "page": "233-243"
+  },
+  "10.1145/2593069.2593163": {
+    "title": ["MOSAIC: Mask optimizing solution with process window aware inverse correction"],
+    "publisher": ""
+  },
+  "10.1117/12.824299": {
+    "page": "458-468"
+  },
+  "10.1117/12.729028": {
+    "title": ["Inverse lithography technology (ILT): a natural solution for model-based SRAF at 45-nm and 32-nm"],
+    "page": "888-897"
+  },
+  "10.1117/12.655728": {
+    "title": ["Pushing the lithography limit: Applying inverse lithography technology (ILT) at the 65nm generation"],
+    "page": "562-571"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "app_name": "LitReviewFlow",
+  "contact_email": "your@email.com",
+  "openalex_api_key": "",
+  "semantic_scholar_api_key": "",
+  "host": "127.0.0.1",
+  "port": 8000,
+  "request_timeout_seconds": 30,
+  "request_delay_seconds": 0.3,
+  "max_retries": 3,
+  "search_defaults": {
+    "query": "",
+    "limit": 10,
+    "providers": [
+      "openalex",
+      "semantic_scholar"
+    ],
+    "year_from": 2024,
+    "year_to": 2026,
+    "sort": "relevance",
+    "require_abstract": true,
+    "semantic_search": true,
+    "include_raw": false
+  }
+}
