@@ -1,4 +1,4 @@
 interface:
   display_name: "LitReviewFlow Search"
   short_description: "Search papers with DOI and abstracts"
-  default_prompt: "Use -search to search recent papers and return DOI plus complete abstracts."
+  default_prompt: "Use litreviewflow-search to find relevant papers and return DOI, source links, and abstracts."

@@ -1,101 +1,104 @@
 ---
 name: litreviewflow-search
-description: Search scholarly papers through the local LitReviewFlow project using OpenAlex and Semantic Scholar, returning paper titles, DOI, URLs, years, authors, abstracts, and optional bilingual abstract fields. Use when the user asks to find literature, recent papers, latest research progress, DOI lists, article abstracts, literature review sources, OpenAlex retrieval, Semantic Scholar retrieval, or asks AI to directly search papers with abstracts.
+description: Search scholarly papers through a LitReviewFlow checkout using OpenAlex and Semantic Scholar, returning titles, DOI, URLs, years, authors, abstracts, and optional bilingual abstract fields. Use when the user asks to find literature, recent research, DOI lists, article abstracts, literature review sources, OpenAlex or Semantic Scholar retrieval, or direct paper searches with abstracts.
 ---
 
 # LitReviewFlow Search
 
+## Project Discovery
+
+Run commands from the LitReviewFlow repository root whenever possible. Identify it by the presence of both `scripts/search_literature.py` and the `litreviewflow/` package.
+
+For the bundled wrapper, resolve the repository in this order:
+
+1. `--project-root <path>`
+2. `LITREVIEWFLOW_HOME`
+3. The current directory or one of its parents
+4. The repository containing this skill, when the skill is used directly from `.codex/skills/`
+
+Never embed a machine-specific absolute path in commands, reports, or skill files.
+
 ## Workflow
 
-Use the local project at `E:\14.TOOLs\LitReviewFlow`.
+1. Interpret the request:
 
-1. Inspect user intent before searching:
+- For latest or recent progress, use a recent year range.
+- For introductions or foundational reviews, broaden the range.
+- For an English or original abstract, include the retrieved English abstract when appropriate.
+- For a Chinese abstract, provide a Chinese translation or paraphrase.
+- For bilingual output, retain the retrieved English abstract and add a Chinese translation or paraphrase. Save large result sets to Markdown or JSON.
 
-- If the user asks for **latest/recent progress**, use a recent year range.
-- If the user asks for an introduction/literature review that needs classic foundations, broaden the year range instead of applying the recent default.
-- If the user asks for **英文摘要**, **原文摘要**, or **directly from the script**, include the retrieved English abstract from the JSON result when copyright limits allow.
-- If the user asks for **中文摘要**, provide a Chinese translation or Chinese paraphrase.
-- If the user asks for **中英文双版本摘要**, return both the retrieved English abstract and a Chinese translation/paraphrase. For many papers or long abstracts, prefer saving the full bilingual table to a local Markdown/JSON file and summarizing the file path in the final answer.
-
-2. Run the CLI for direct retrieval:
+2. Run the CLI from the repository root:
 
 ```powershell
-python E:\14.TOOLs\LitReviewFlow\scripts\search_literature.py "<query>" --limit 10
+python scripts/search_literature.py "<query>" --limit 10
 ```
 
-For exact DOI lookup or filling original English abstracts for known papers, use DOI mode instead of keyword search:
+For exact DOI retrieval, use DOI mode:
 
 ```powershell
-python E:\14.TOOLs\LitReviewFlow\scripts\search_literature.py --doi "10.1117/1.2399537" --providers openalex --output english
-python E:\14.TOOLs\LitReviewFlow\scripts\search_literature.py --doi-file .\dois.txt --providers openalex --limit 50 --output bilingual
-python E:\14.TOOLs\LitReviewFlow\scripts\search_literature.py "10.1117/1.2399537" --exact-doi --providers openalex --output english
+python scripts/search_literature.py --doi "10.1117/1.2399537" --providers openalex --output english
+python scripts/search_literature.py --doi-file .\dois.txt --providers openalex --limit 50 --output bilingual
+python scripts/search_literature.py "10.1117/1.2399537" --exact-doi --providers openalex --output english
 ```
 
-Never pass a DOI as an ordinary keyword query when the goal is to verify a specific paper; search APIs may return a different paper with a similar DOI/text match.
+Never pass a DOI as an ordinary keyword query when verifying a specific paper.
 
 3. Prefer these defaults unless the user specifies otherwise:
 
 - `limit`: 8-10 per query
-- `providers`: `openalex` for large/batch retrieval; use `openalex,semantic_scholar` for small targeted retrieval or gap filling
-- `year_from`: 2024 only for "latest/recent" requests; use broad ranges such as 1990-current for review/introduction tasks and 1950-current for foundational optics/TCC/Hopkins tasks
+- `providers`: `openalex` for large retrieval; `openalex,semantic_scholar` for targeted retrieval or gap filling
+- `year_from`: 2024 only for recent requests; use broader ranges for reviews
 - `year_to`: current year
 - `semantic_search`: true
 - `require_abstract`: true
 
-4. For "latest progress" requests, use a domain-expanded English query. Example:
+Recent-progress example:
 
 ```powershell
-python E:\14.TOOLs\LitReviewFlow\scripts\search_literature.py "field-oriented control FOC motor drive PMSM induction motor latest advances" --limit 10 --year-from 2024 --year-to 2026 --semantic-search
+python scripts/search_literature.py "field-oriented control FOC motor drive PMSM induction motor latest advances" --limit 10 --year-from 2024 --year-to 2026 --semantic-search
 ```
 
-5. For 30+ paper requests:
+4. For 30 or more papers:
 
 - Split the search into topical batches.
 - Start with `--providers openalex` to reduce timeout risk.
-- Use `--sort citation_count` for foundational/representative literature and `--sort relevance` or recent year filters for emerging work.
-- Deduplicate by DOI first, then by normalized title.
-- Manually filter false positives by title and abstract relevance.
-- If semantic search returns OpenAlex 500 errors, retry the same query with `--no-semantic-search`, stricter terms, or a smaller limit.
-- If a candidate set already has DOI values, use `--doi-file` to refill `abstract_en_raw` by exact DOI lookup instead of re-searching titles.
+- Use `--sort citation_count` for foundational literature and relevance or year sorting for emerging work.
+- Deduplicate by DOI, then normalized title.
+- Filter false positives by title and abstract relevance.
+- Retry OpenAlex semantic-search failures with `--no-semantic-search`, stricter terms, or a smaller limit.
+- Use `--doi-file` to refill abstracts by exact DOI when candidate DOI values already exist.
 
-6. Return a concise list with title, year, DOI, source URL, and abstract. If the result set contains false positives, rerun with stricter keywords and filter manually by title/abstract relevance.
+5. Return title, year, DOI, source URL, and abstract. Rerun with stricter terms when results contain false positives.
 
-## Output and Copyright
+## Output
 
 - Always include DOI and source URL when available.
-- For large literature sets, create or update a Markdown file in the user's requested/project-relevant location when that is more readable than chat output.
-- When the user wants exact English abstracts from the script, preserve them in the generated file if feasible, but avoid pasting excessive verbatim abstracts directly in chat.
-- When copyright constraints make long verbatim abstract reproduction inappropriate in chat, state this briefly and provide Chinese paraphrases/translations in chat or a local research working file as appropriate.
-- Make the output mode explicit:
-  - `english`: retrieved English abstract from `abstract_en_raw` / `abstract`
-  - `zh`: Chinese translation/paraphrase generated by the agent
-  - `bilingual`: `abstract_en_raw` from LitReviewFlow plus agent-generated `abstract_zh` or Chinese paraphrase
+- Save large literature sets to a project-relevant Markdown or JSON file.
+- Avoid pasting excessive verbatim abstracts into chat.
+- Use these output meanings:
+  - `english`: retrieved `abstract_en_raw` or `abstract`
+  - `zh`: agent-generated Chinese translation or paraphrase
+  - `bilingual`: retrieved English plus agent-generated Chinese
 
 ## HTTP Interface
 
-If the LitReviewFlow API server is running, use:
+When the API server is running:
 
 ```text
 GET http://127.0.0.1:8000/ai/literature/search?query=<urlencoded query>&limit=10&year_from=2024&year_to=2026&semantic_search=true
-```
-
-Tool discovery:
-
-```text
 GET http://127.0.0.1:8000/ai/tools
 GET http://127.0.0.1:8000/openapi.json
 ```
 
-Start the service when needed:
+Start it from the repository root:
 
 ```powershell
 python -m uvicorn litreviewflow.api:app --host 127.0.0.1 --port 8000
 ```
 
-Run it from `E:\14.TOOLs\LitReviewFlow`.
-
 ## Configuration
 
-The main configuration is `E:\14.TOOLs\LitReviewFlow\config\config.json`. It can contain local OpenAlex and Semantic Scholar API keys, plus default providers, year range, result limit, abstract requirements, retry settings, host, and port.
+Use `config/config.json` relative to the repository root. Copy `config/config.example.json` when creating local configuration, keep API keys out of Git, and read `doc/使用文档.md` for setup or API details.
 
-Read `E:\14.TOOLs\LitReviewFlow\doc\使用文档.md` when the user asks for setup details or API usage documentation.
+Read [references/api.md](references/api.md) when HTTP request and response details are needed.
