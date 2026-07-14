@@ -23,6 +23,5 @@ Thumbs.db
 .idea/
 .vscode/
 
-# 忽略输出的报告
-reports
-reports/ccnu_prof_dong_wang_publications.md
+# Generated reports
+reports/
